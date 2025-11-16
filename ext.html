@@ -267,11 +267,11 @@
       <header>Nuevo overlay predefinido</header>
       <div class="field">
         <label for="preset-title">Título</label>
-        <input id="preset-title" type="text" placeholder="P. ej. ¡Curva épica!" />
+        <input id="preset-title" type="text" maxlength="17" placeholder="P. ej. ¡Curva épica!" />
       </div>
       <div class="field">
         <label for="preset-subtitle">Subtítulo</label>
-        <input id="preset-subtitle" type="text" placeholder="Descripción" />
+        <input id="preset-subtitle" type="text" maxlength="42" placeholder="Descripción" />
       </div>
       <div class="field">
         <label for="preset-duration">Tiempo (segundos)</label>
@@ -325,6 +325,8 @@
     }
 
     const presets = loadPresetsFromStorage();
+    const MAX_TITLE_LENGTH = 17;
+    const MAX_SUBTITLE_LENGTH = 42;
     let editingPresetIndex = null;
 
     function log(msg) {
@@ -497,14 +499,16 @@
     });
 
     presetSaveBtn.addEventListener('click', () => {
-      const title = presetTitleEl.value.trim();
-      if (!title) {
+      const titleRaw = presetTitleEl.value.trim();
+      if (!titleRaw) {
         alert('El título es obligatorio.');
         return;
       }
+      const title = titleRaw.slice(0, MAX_TITLE_LENGTH);
+      const subtitle = presetSubtitleEl.value.trim().slice(0, MAX_SUBTITLE_LENGTH);
       const newPreset = {
         title,
-        subtitle: presetSubtitleEl.value.trim(),
+        subtitle,
         duration: Number(presetDurationEl.value) || 4
       };
       if (editingPresetIndex !== null) {
