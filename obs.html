@@ -155,8 +155,10 @@
     const soundMap = {
       applause1: new Audio('sounds/applause1.mp3'),
       applause2: new Audio('sounds/applause2.mp3'),
+      applause3: new Audio('sounds/applause3.mp3'),
       laugh1: new Audio('sounds/laugh1.mp3'),
-      laugh2: new Audio('sounds/laugh2.mp3')
+      laugh2: new Audio('sounds/laugh2.mp3'),
+      laugh3: new Audio('sounds/laugh3.mp3')
     };
 
     const WS_URL = "ws://localhost:8080";
@@ -213,6 +215,11 @@
     function processMessage(payload) {
       try {
       const data = JSON.parse(payload);
+      const hasText = Boolean(data.title || data.subtitle);
+      if (data.sound && !hasText) {
+        playSound(data.sound);
+        return;
+      }
       showLowerThird(data);
       playSound(data.sound);
       } catch {

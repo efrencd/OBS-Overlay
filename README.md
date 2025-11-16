@@ -7,7 +7,7 @@ This repository shines a transparent browser-based overlay into OBS studio while
 - `server.js`: lightweight Node.js server built with `ws`. It listens on port 8080 and broadcasts every incoming JSON payload to every connected client (both overlays and the control page share the same feed).  
 - `obs.html`: the actual OBS source. It runs at 1920×1080 with a floating lower-third panel on the left. Text elements and sound cues are animated independently: the green panel slides in from the left and the copy lifts from below, so even lengthy subtitles stay inside the expanding background.  
 - `ext.html`: “control panel” that lets you manage presets, send sounds, monitor connection status, and reconnect to different WebSocket endpoints. Presets are saved in `localStorage`, survive reloads, and can be edited or deleted from the UI.
-- `sounds/`: four MP3s (`applause1`, `applause2`, `laugh1`, `laugh2`) that the overlay can play when it receives a `{ sound: '...' }` command.
+- `sounds/`: six MP3s (`applause1`, `applause2`, `applause3`, `laugh1`, `laugh2`, `laugh3`) downloaded from Pixabay for quick applause and laugh cues when a `{ sound: '...' }` command is delivered.
 
 ## Usage
 
@@ -42,3 +42,4 @@ Any client connected to the WebSocket can emit that JSON and every other client 
 - The control UI dynamically hides the connection inputs while connected, but you can still reconnect or change URLs manually.  
 - All animations and fading happen purely in CSS/JS so the OBS source stays lightweight.  
 - Sounds play alongside the overlay text only when specified; the quick-sound buttons deliberately send payloads with empty text so the lower-third stays hidden.
+- All included sound effects (applause1-3, laugh1-3) were sourced from Pixabay.
