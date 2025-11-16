@@ -149,9 +149,15 @@
   <script>
     const statusEl = document.getElementById('status');
     const lowerThird = document.getElementById('lower-third');
+    const textContainer = document.getElementById('lower-third-text');
     const titleEl = document.getElementById('lt-title');
     const subtitleEl = document.getElementById('lt-subtitle');
-    const textContainer = document.getElementById('lower-third-text');
+    const soundMap = {
+      applause1: new Audio('sounds/applause1.mp3'),
+      applause2: new Audio('sounds/applause2.mp3'),
+      laugh1: new Audio('sounds/laugh1.mp3'),
+      laugh2: new Audio('sounds/laugh2.mp3')
+    };
 
     const WS_URL = "ws://localhost:8080";
     let socket;
@@ -179,6 +185,13 @@
       textContainer.classList.add('lower-third-text--hiding');
     }
 
+    function playSound(soundKey) {
+      if (!soundKey || !soundMap[soundKey]) return;
+      const audio = soundMap[soundKey];
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+
     function showLowerThird(data) {
       const { title, subtitle, duration } = data || {};
       if (!title && !subtitle) return;
@@ -199,8 +212,9 @@
 
     function processMessage(payload) {
       try {
-        const data = JSON.parse(payload);
-        showLowerThird(data);
+      const data = JSON.parse(payload);
+      showLowerThird(data);
+      playSound(data.sound);
       } catch {
         showLowerThird({ title: payload });
       }

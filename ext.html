@@ -152,6 +152,21 @@
       gap: 0.5rem;
       margin-top: 0.4rem;
     }
+    .sound-section {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .sound-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.6rem;
+    }
+    .sound-btn {
+      font-size: 0.85rem;
+      text-transform: none;
+    }
     .predefined-buttons {
       display: flex;
       flex-direction: column;
@@ -258,6 +273,16 @@
       <div class="predefined-buttons" id="preset-list"></div>
     </div>
 
+    <div class="sound-section">
+      <strong>Sonidos rápidos</strong>
+      <div class="sound-grid">
+        <button class="secondary sound-btn" data-sound="applause1">Aplauso 1</button>
+        <button class="secondary sound-btn" data-sound="applause2">Aplauso 2</button>
+        <button class="secondary sound-btn" data-sound="laugh1">Risa 1</button>
+        <button class="secondary sound-btn" data-sound="laugh2">Risa 2</button>
+      </div>
+    </div>
+
     <div class="log-label">LOG (las tripas de lo que está pasando):</div>
     <div id="log"></div>
   </main>
@@ -297,6 +322,7 @@
     const presetSaveBtn = document.getElementById('preset-save');
     const presetCancelBtn = document.getElementById('preset-cancel');
     const presetListEl = document.getElementById('preset-list');
+    const soundButtons = document.querySelectorAll('.sound-btn');
     const connectionBlock = document.getElementById('connection-block');
 
     const DEFAULT_SERVER = 'ws://localhost:8080';
@@ -519,6 +545,28 @@
       persistPresets();
       renderPresets();
       closePresetModal();
+    });
+
+    function sendSound(soundKey, label) {
+      if (!soundKey) return;
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        alert('No hay conexión con el servidor.');
+        return;
+      }
+      const payload = JSON.stringify({
+        title: '',
+        subtitle: '',
+        duration: 3,
+        sound: soundKey
+      });
+      socket.send(payload);
+      log('Enviado efecto: ' + payload);
+    }
+
+    soundButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        sendSound(btn.dataset.sound, btn.textContent.trim());
+      });
     });
   </script>
 </body>
