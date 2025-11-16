@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -32,6 +32,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      min-height: 720px;
     }
     h1 {
       margin: 0;
@@ -43,6 +44,12 @@
       margin: 0.2rem 0 0.6rem;
       font-size: 0.9rem;
       color: rgba(244, 246, 251, 0.7);
+    }
+    #status {
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+      margin: 0;
+      color: #9ab5ff;
     }
     .field {
       display: flex;
@@ -74,8 +81,17 @@
     small {
       color: rgba(244, 246, 251, 0.6);
     }
+    .log-label {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      color: rgba(244, 246, 251, 0.8);
+    }
+
     #log {
       min-height: 120px;
+      max-height: 120px;
       border-radius: 0.75rem;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(6, 7, 12, 0.8);
@@ -84,16 +100,21 @@
       overflow-y: auto;
       white-space: pre-wrap;
     }
-    #status {
-      font-size: 0.95rem;
-      padding: 0.5rem 0;
-      margin: 0;
-      color: #9ab5ff;
-    }
     .actions {
       display: flex;
       flex-direction: column;
       gap: 0.65rem;
+    }
+    .connection-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .connection-block.hidden {
+      display: none;
+    }
+    .connection-actions button {
+      width: 100%;
     }
     button {
       border: none;
@@ -125,6 +146,70 @@
       transform: translateY(-1px);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
     }
+    .predefined {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .predefined-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .predefined-entry {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .predefined-entry button {
+      flex: 1;
+      text-align: left;
+      border-radius: 0.8rem;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      text-transform: none;
+    }
+    .predefined-entry button.edit,
+    .predefined-entry button.trash {
+      width: 44px;
+      text-align: center;
+      flex: none;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 6, 10, 0.8);
+      padding: 1.5rem;
+      z-index: 10;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      width: min(420px, 100%);
+      background: #0b0c14;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1.5rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .modal header {
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+    .modal .actions {
+      flex-direction: row;
+    }
+    .modal button {
+      flex: 1;
+    }
     @media (max-width: 480px) {
       body {
         padding: 1rem;
@@ -138,6 +223,9 @@
       .actions {
         gap: 0.5rem;
       }
+      .modal .actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -145,56 +233,102 @@
   <main class="panel">
     <header>
       <h1>Panel de OBS</h1>
-      <p class="meta">Envia títulos y subtítulos al overlay desde cualquier dispositivo en la red.</p>
+      <p class="meta">Envía títulos y subtítulos al overlay desde cualquier dispositivo en la red.</p>
     </header>
 
     <div id="status">Desconectado</div>
 
-    <div class="field">
-      <label for="server">Servidor WebSocket</label>
-      <input id="server" type="text" value="ws://localhost:8080" />
-      <small>Introduce la IP del PC con OBS si no estás en la misma máquina, p. ej. <code>ws://192.168.1.42:8080</code></small>
-    </div>
-
-    <div class="field">
-      <label for="title">Título</label>
-      <input id="title" type="text" placeholder="P. ej. ¡Nuevo récord!" />
-    </div>
-    <div class="field">
-      <label for="subtitle">Subtítulo</label>
-      <input id="subtitle" type="text" placeholder="Detalles complementarios" />
-    </div>
-    <div class="field">
-      <label for="duration">Duración (segundos)</label>
-      <input id="duration" type="number" min="1" step="0.5" value="4" />
+    <div class="connection-block" id="connection-block">
+      <div class="field">
+        <label for="server">Servidor WebSocket</label>
+        <input id="server" type="text" value="ws://localhost:8080" />
+        <small>Introduce la IP del PC con OBS si no estás en la misma máquina, p. ej. <code>ws://192.168.1.42:8080</code></small>
+      </div>
+      <div class="actions connection-actions">
+        <button id="reconnect" class="secondary" type="button">Reconectar servidor</button>
+      </div>
     </div>
 
     <div class="actions">
-      <button id="send" class="primary">Enviar al overlay</button>
-      <button id="reconnect" class="secondary" type="button">Reconectar servidor</button>
+      <button id="add-preset" class="secondary" type="button">Añadir overlay predefinido</button>
     </div>
 
+    <div class="predefined">
+      <strong>Predefinidos</strong>
+      <div class="predefined-buttons" id="preset-list"></div>
+    </div>
+
+    <div class="log-label">LOG (las tripas de lo que está pasando):</div>
     <div id="log"></div>
   </main>
+
+  <div class="modal" id="preset-modal">
+    <div class="modal-content">
+      <header>Nuevo overlay predefinido</header>
+      <div class="field">
+        <label for="preset-title">Título</label>
+        <input id="preset-title" type="text" placeholder="P. ej. ¡Curva épica!" />
+      </div>
+      <div class="field">
+        <label for="preset-subtitle">Subtítulo</label>
+        <input id="preset-subtitle" type="text" placeholder="Descripción" />
+      </div>
+      <div class="field">
+        <label for="preset-duration">Tiempo (segundos)</label>
+        <input id="preset-duration" type="number" min="1" step="0.5" value="4" />
+      </div>
+      <div class="actions">
+        <button id="preset-save" class="primary">Guardar preset</button>
+        <button id="preset-cancel" class="secondary" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const statusEl = document.getElementById('status');
     const logEl = document.getElementById('log');
-    const titleEl = document.getElementById('title');
-    const subtitleEl = document.getElementById('subtitle');
-    const durationEl = document.getElementById('duration');
-    const sendBtn = document.getElementById('send');
     const serverInput = document.getElementById('server');
     const reconnectBtn = document.getElementById('reconnect');
+    const addPresetBtn = document.getElementById('add-preset');
+    const presetModal = document.getElementById('preset-modal');
+    const presetTitleEl = document.getElementById('preset-title');
+    const presetSubtitleEl = document.getElementById('preset-subtitle');
+    const presetDurationEl = document.getElementById('preset-duration');
+    const presetSaveBtn = document.getElementById('preset-save');
+    const presetCancelBtn = document.getElementById('preset-cancel');
+    const presetListEl = document.getElementById('preset-list');
+    const connectionBlock = document.getElementById('connection-block');
 
     const DEFAULT_SERVER = 'ws://localhost:8080';
     let socket;
     let reconnectTimer;
     let currentServer = DEFAULT_SERVER;
     let autoReconnectEnabled = true;
+    const STORAGE_KEY = 'obs_overlay_presets';
+
+    function loadPresetsFromStorage() {
+      if (!window.localStorage) return [];
+      try {
+        return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function persistPresets() {
+      if (!window.localStorage) return;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
+      } catch {
+        // Ignorar errores de almacenamiento en entornos restringidos
+      }
+    }
+
+    const presets = loadPresetsFromStorage();
+    let editingPresetIndex = null;
 
     function log(msg) {
-      logEl.textContent += msg + "\n";
+      logEl.textContent += msg + '\n';
       logEl.scrollTop = logEl.scrollHeight;
       console.log(msg);
     }
@@ -210,6 +344,11 @@
       return `ws://${trimmed}`;
     }
 
+    function setConnectionControlsVisible(visible) {
+      if (!connectionBlock) return;
+      connectionBlock.classList.toggle('hidden', !visible);
+    }
+
     function connect(server) {
       const nextServer = normalizeServer(server || serverInput.value || currentServer);
       currentServer = nextServer;
@@ -220,21 +359,23 @@
         socket.close(1000, 'Reconnecting');
       }
 
-      setStatus('Conectando a ' + nextServer + '…');
+      setStatus('Conectando a ' + nextServer + '...');
       log('Intentando conectar a ' + nextServer);
       socket = new WebSocket(nextServer);
 
       socket.onopen = () => {
         setStatus('Conectado');
         log('Conectado al servidor.');
+        setConnectionControlsVisible(false);
       };
 
       socket.onclose = () => {
-        setStatus('Desconectado. Reintentando…');
-        log('Desconectado. Reintentando en 2s…');
+        setStatus('Desconectado. Reintentando...');
+        log('Desconectado. Reintentando en 2s...');
         if (autoReconnectEnabled) {
           reconnectTimer = setTimeout(() => connect(currentServer), 2000);
         }
+        setConnectionControlsVisible(true);
       };
 
       socket.onerror = (err) => {
@@ -246,7 +387,89 @@
       };
     }
 
+    function sendOverlay(data) {
+      if (!data || !data.title) {
+        alert('El título es obligatorio.');
+        return;
+      }
+
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        alert('No hay conexión con el servidor.');
+        return;
+      }
+
+      const payload = JSON.stringify({
+        title: data.title,
+        subtitle: data.subtitle || '',
+        duration: data.duration || 4
+      });
+
+      socket.send(payload);
+      log('Enviado: ' + payload);
+    }
+
+    function renderPresets() {
+      presetListEl.innerHTML = '';
+      if (!presets.length) {
+        const empty = document.createElement('p');
+        empty.textContent = 'Sin overlays predefinidos todavía.';
+        empty.style.opacity = '0.8';
+        presetListEl.appendChild(empty);
+        return;
+      }
+
+      presets.forEach((preset, index) => {
+        const entry = document.createElement('div');
+        entry.className = 'predefined-entry';
+
+        const button = document.createElement('button');
+        button.className = 'secondary';
+        button.textContent = preset.title;
+        button.addEventListener('click', () => {
+          sendOverlay(preset);
+        });
+
+        const edit = document.createElement('button');
+        edit.className = 'secondary edit';
+        edit.setAttribute('aria-label', 'Editar preset');
+        edit.textContent = '✏️';
+        edit.addEventListener('click', () => {
+          openPresetModal(index);
+        });
+
+        const trash = document.createElement('button');
+        trash.className = 'secondary trash';
+        trash.setAttribute('aria-label', 'Eliminar preset');
+        trash.textContent = '🗑️';
+        trash.addEventListener('click', () => {
+          presets.splice(index, 1);
+          persistPresets();
+          renderPresets();
+        });
+
+        entry.appendChild(button);
+        entry.appendChild(edit);
+        entry.appendChild(trash);
+        presetListEl.appendChild(entry);
+      });
+    }
+
+    function openPresetModal(index = null) {
+      editingPresetIndex = typeof index === 'number' ? index : null;
+      const preset = editingPresetIndex !== null ? presets[editingPresetIndex] : null;
+      presetTitleEl.value = preset ? preset.title : '';
+      presetSubtitleEl.value = preset ? preset.subtitle : '';
+      presetDurationEl.value = preset ? preset.duration : 4;
+      presetModal.classList.add('show');
+    }
+
+    function closePresetModal() {
+      presetModal.classList.remove('show');
+      editingPresetIndex = null;
+    }
+
     connect();
+    renderPresets();
 
     reconnectBtn.addEventListener('click', () => {
       autoReconnectEnabled = true;
@@ -265,26 +488,33 @@
       }
     });
 
-    sendBtn.addEventListener('click', () => {
-      const title = titleEl.value.trim();
+    addPresetBtn.addEventListener('click', () => openPresetModal());
+    presetCancelBtn.addEventListener('click', closePresetModal);
+    presetModal.addEventListener('click', (event) => {
+      if (event.target === presetModal) {
+        closePresetModal();
+      }
+    });
+
+    presetSaveBtn.addEventListener('click', () => {
+      const title = presetTitleEl.value.trim();
       if (!title) {
         alert('El título es obligatorio.');
         return;
       }
-
-      if (!socket || socket.readyState !== WebSocket.OPEN) {
-        alert('No hay conexión con el servidor.');
-        return;
-      }
-
-      const payload = JSON.stringify({
+      const newPreset = {
         title,
-        subtitle: subtitleEl.value.trim(),
-        duration: durationEl.value || 4
-      });
-
-      socket.send(payload);
-      log('Enviado: ' + payload);
+        subtitle: presetSubtitleEl.value.trim(),
+        duration: Number(presetDurationEl.value) || 4
+      };
+      if (editingPresetIndex !== null) {
+        presets[editingPresetIndex] = newPreset;
+      } else {
+        presets.push(newPreset);
+      }
+      persistPresets();
+      renderPresets();
+      closePresetModal();
     });
   </script>
 </body>
