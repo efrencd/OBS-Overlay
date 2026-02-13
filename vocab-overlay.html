@@ -37,7 +37,7 @@
       position: absolute;
       left: 50%;
       bottom: 5%;
-      transform: translateX(-50%);
+      transform: translate(-50%, 120%);
       width: min(760px, 88vw);
       border-radius: 18px;
       padding: 16px;
@@ -49,6 +49,13 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: transform 320ms ease, opacity 320ms ease;
+    }
+
+    .lower-third.is-visible {
+      transform: translate(-50%, 0);
+      opacity: 1;
     }
 
     table {

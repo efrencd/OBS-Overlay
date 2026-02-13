@@ -1,7 +1,7 @@
 const pairs = [
   { zh: "ni hao", es: "Hola" },
-  { zh: "ni zenme yang", es: "\u00bfC\u00f3mo est\u00e1s?" },
-  { zh: "hen hao", es: "Muy bien" },
+  { zh: "ni hao ma", es: "\u00bfC\u00f3mo est\u00e1s?" },
+  { zh: "wo hen hao", es: "Yo estoy muy bien" },
   { zh: "xie xie", es: "Gracias" },
   { zh: "ni ne", es: "\u00bfY t\u00fa?" },
   { zh: "zai jian", es: "Adi\u00f3s" }
@@ -9,6 +9,7 @@ const pairs = [
 
 const chinoCell = document.getElementById("chino");
 const espanolCell = document.getElementById("espanol");
+const lowerThird = document.querySelector(".lower-third");
 
 let index = 0;
 
@@ -43,7 +44,18 @@ function previousPair() {
   renderPair(index, true);
 }
 
+function toggleLowerThird() {
+  if (!lowerThird) return;
+  lowerThird.classList.toggle("is-visible");
+}
+
 window.addEventListener("keydown", (event) => {
+  if (event.code === "Space" || event.key === " ") {
+    event.preventDefault();
+    toggleLowerThird();
+    return;
+  }
+
   if (event.key === "ArrowRight") {
     event.preventDefault();
     nextPair();
