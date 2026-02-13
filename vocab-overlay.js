@@ -50,7 +50,7 @@ function toggleLowerThird() {
 }
 
 window.addEventListener("keydown", (event) => {
-  if (event.code === "Space" || event.key === " ") {
+  if (event.code === "KeyH" || event.key.toLowerCase() === "h") {
     event.preventDefault();
     toggleLowerThird();
     return;
