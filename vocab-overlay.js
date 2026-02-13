@@ -1,9 +1,9 @@
 const pairs = [
   { zh: "ni hao", es: "Hola" },
-  { zh: "ni hao ma", es: "Qu\u00e9 tal" },
-  { zh: "wo hen hao", es: "Estoy bien" },
-  { zh: "ni ne", es: "\u00bfY t\u00fa?" },
+  { zh: "ni zenme yang", es: "C\u00f3mo est\u00e1s?" },
+  { zh: "hen hao", es: "Muy bien" },
   { zh: "xie xie", es: "Gracias" },
+  { zh: "ni ne", es: "\u00bfY t\u00fa?" },
   { zh: "zai jian", es: "Adi\u00f3s" }
 ];
 
